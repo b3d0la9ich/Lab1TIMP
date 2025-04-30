@@ -6,7 +6,7 @@ export default function IncidentList() {
 
   const loadData = async () => {
     try {
-      const res = await axios.get('http://217.71.129.139:5496/api/incidents');
+      const res = await axios.get('/api/incidents');
       setIncidents(res.data);
     } catch (err) {
       console.error('Ошибка загрузки инцидентов:', err);
@@ -15,10 +15,19 @@ export default function IncidentList() {
 
   const resolveIncident = async (id) => {
     try {
-      await axios.post(`http://217.71.129.139:5496/api/resolve/${id}`);
-      loadData(); 
+      await axios.post(`/api/resolve/${id}`);
+      loadData();
     } catch (err) {
-      console.error('Ошибка при отметке как решённого:', err);
+      console.error('Ошибка при завершении инцидента:', err);
+    }
+  };
+
+  const deleteIncident = async (id) => {
+    try {
+      await axios.delete(`/api/incidents/${id}`);
+      loadData();
+    } catch (err) {
+      console.error('Ошибка при удалении инцидента:', err);
     }
   };
 
@@ -35,9 +44,16 @@ export default function IncidentList() {
         <ul>
           {incidents.map((i) => (
             <li key={i.id}>
-              <strong>[{i.type}]</strong> {i.description} — {i.resolved ? '✅ задержан!' : '❗️ тревога'}
+              <strong>[{i.type}]</strong> {i.description} —{' '}
+              {i.resolved ? '✅ задержан!' : '❗ тревога'}{' '}
               {!i.resolved && (
-                <button onClick={() => resolveIncident(i.id)}>Задержать!</button>
+                <>
+                  <button onClick={() => resolveIncident(i.id)}>Задержать!</button>{' '}
+                  <button onClick={() => deleteIncident(i.id)}>Удалить</button>
+                </>
+              )}
+              {i.resolved && (
+                <button onClick={() => deleteIncident(i.id)}>Удалить</button>
               )}
             </li>
           ))}
