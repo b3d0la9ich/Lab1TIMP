@@ -92,7 +92,7 @@ def load_incidents():
             json.dump([], f)
         return []
     
-@app.route('/api/incidents/<int:incident_id>', methods=['DELETE'])
+@app.route('/api/delete/<int:incident_id>', methods=['DELETE'])
 def delete_incident(incident_id):
     incidents = load_incidents()
     updated = [i for i in incidents if i['id'] != incident_id]

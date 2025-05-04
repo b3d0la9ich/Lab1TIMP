@@ -24,7 +24,7 @@ export default function IncidentList() {
 
   const deleteIncident = async (id) => {
     try {
-      await axios.delete(`/api/incidents/${id}`);
+      await axios.delete(`/api/delete/${id}`);
       loadData();
     } catch (err) {
       console.error('Ошибка при удалении инцидента:', err);
