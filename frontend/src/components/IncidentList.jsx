@@ -6,7 +6,7 @@ export default function IncidentList() {
 
   const loadData = async () => {
     try {
-      const res = await axios.get('/api/incidents');
+      const res = await axios.get('http://localhost:5000/api/incidents');
       setIncidents(res.data);
     } catch (err) {
       console.error('Ошибка загрузки инцидентов:', err);
@@ -15,7 +15,7 @@ export default function IncidentList() {
 
   const resolveIncident = async (id) => {
     try {
-      await axios.post(`/api/resolve/${id}`);
+      await axios.post(`http://localhost:5000/api/resolve/${id}`);
       loadData();
     } catch (err) {
       console.error('Ошибка при завершении инцидента:', err);
@@ -24,7 +24,7 @@ export default function IncidentList() {
 
   const deleteIncident = async (id) => {
     try {
-      await axios.delete(`/api/delete/${id}`);
+      await axios.delete(`http://localhost:5000/api/delete/${id}`);
       loadData();
     } catch (err) {
       console.error('Ошибка при удалении инцидента:', err);
