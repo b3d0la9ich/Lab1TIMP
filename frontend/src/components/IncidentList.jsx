@@ -9,7 +9,7 @@ export default function IncidentList() {
 
   const loadData = async () => {
     try {
-      const res = await axios.get('/api/incidents');
+      const res = await axios.get('http://localhost:5000/api/incidents');
       setIncidents(res.data);
     } catch (err) {
       console.error('Ошибка загрузки инцидентов:', err);
@@ -33,7 +33,7 @@ export default function IncidentList() {
 
   const deleteIncident = async (id) => {
     try {
-      await axios.delete(`/api/delete/${id}`, {
+      await axios.delete(`http://localhost:5000/api/delete/${id}`, {
         headers: { Authorization: token },
       });
       loadData();

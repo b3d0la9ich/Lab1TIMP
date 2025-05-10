@@ -32,7 +32,7 @@ export default function BaggageScanner() {
     const generated = getRandomBaggage();
     setBaggage(generated);
     try {
-      const res = await axios.post('/api/scan_baggage', {
+      const res = await axios.post('http://localhost:5000/api/scan_baggage', {
         contents: generated,
       });
       setResult(res.data.result);
