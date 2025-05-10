@@ -14,7 +14,7 @@ export default function PersonScanner() {
 
     setTimeout(async () => {
       try {
-        const res = await axios.post('http://localhost:5000/api/scan_person');
+        const res = await axios.post('/api/scan_person');
         setResult(res.data.result);
         setStatusColor(res.data.incident ? 'red' : 'green');
       } catch (err) {

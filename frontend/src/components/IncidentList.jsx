@@ -4,10 +4,12 @@ import './IncidentList.css';
 
 export default function IncidentList() {
   const [incidents, setIncidents] = useState([]);
+  const role = localStorage.getItem('role');
+  const token = localStorage.getItem('token');
 
   const loadData = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/incidents');
+      const res = await axios.get('/api/incidents');
       setIncidents(res.data);
     } catch (err) {
       console.error('Ошибка загрузки инцидентов:', err);
@@ -16,7 +18,13 @@ export default function IncidentList() {
 
   const resolveIncident = async (id) => {
     try {
-      await axios.post(`http://localhost:5000/api/resolve/${id}`);
+      await axios.post(
+        `/api/resolve/${id}`,
+        {},
+        {
+          headers: { Authorization: token },
+        }
+      );
       loadData();
     } catch (err) {
       console.error('Ошибка при завершении инцидента:', err);
@@ -25,7 +33,9 @@ export default function IncidentList() {
 
   const deleteIncident = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/delete/${id}`);
+      await axios.delete(`/api/delete/${id}`, {
+        headers: { Authorization: token },
+      });
       loadData();
     } catch (err) {
       console.error('Ошибка при удалении инцидента:', err);
@@ -55,14 +65,16 @@ export default function IncidentList() {
                 <span className="status-alert">❗ тревога</span>
               )}
             </div>
-            <div className="buttons">
-              {!i.resolved && (
-                <button onClick={() => resolveIncident(i.id)}>Задержать!</button>
-              )}
-              <button className="delete" onClick={() => deleteIncident(i.id)}>
-                Удалить
-              </button>
-            </div>
+            {role === 'admin' && (
+              <div className="buttons">
+                {!i.resolved && (
+                  <button onClick={() => resolveIncident(i.id)}>Задержать!</button>
+                )}
+                <button className="delete" onClick={() => deleteIncident(i.id)}>
+                  Удалить
+                </button>
+              </div>
+            )}
           </div>
         ))
       )}
