@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import './PersonScanner.css';
 
 export default function PersonScanner() {
   const [result, setResult] = useState('');
@@ -26,31 +27,17 @@ export default function PersonScanner() {
   };
 
   return (
-    <div>
-      <h2>Сканер человека</h2>
+    <div className="scanner-container">
+      <h2>🧍 Сканер человека</h2>
       <button onClick={handleScan} disabled={scanning}>
         {scanning ? 'Сканирую...' : 'Сканировать'}
       </button>
 
-      <div style={{
-        marginTop: '20px',
-        width: '100px',
-        height: '100px',
-        borderRadius: '50%',
-        backgroundColor: statusColor,
-        transition: 'background-color 0.5s',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: 'white',
-        fontWeight: 'bold'
-      }}>
+      <div className={`status-indicator ${statusColor}`}>
         {scanning ? '...' : result ? (statusColor === 'red' ? '🚨' : '✅') : ''}
       </div>
 
-      {result && (
-        <p style={{ marginTop: '10px' }}><strong>Результат:</strong> {result}</p>
-      )}
+      {result && <p><strong>Результат:</strong> {result}</p>}
     </div>
   );
 }

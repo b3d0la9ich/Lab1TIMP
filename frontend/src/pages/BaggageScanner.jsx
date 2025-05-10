@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import './BaggageScanner.css'; // Подключаем стили
 
 const allowedItems = ['одежда', 'книги', 'зубная щётка', 'наушники', 'ноутбук', 'бутылка воды', 'вилка', 'пауэрбанк', 'плед'];
 const forbiddenItems = ['нож', 'пистолет', 'взрывчатка'];
@@ -14,14 +15,11 @@ function shuffle(array) {
 function getRandomBaggage() {
   const items = [...allowedItems];
   shuffle(items);
-
   let selected = items.slice(0, Math.floor(Math.random() * 4) + 2);
-
   if (Math.random() < 0.1) {
     const forbidden = forbiddenItems[Math.floor(Math.random() * forbiddenItems.length)];
     selected.splice(Math.floor(Math.random() * selected.length), 0, forbidden);
   }
-
   return selected.join(', ');
 }
 
@@ -38,13 +36,13 @@ export default function BaggageScanner() {
         contents: generated,
       });
       setResult(res.data.result);
-
       const newEntry = {
         contents: generated,
         result: res.data.result,
+        incident: res.data.incident,
         timestamp: new Date().toLocaleTimeString(),
       };
-      setHistory(prev => [newEntry, ...prev.slice(0, 4)]); // максимум 5
+      setHistory(prev => [newEntry, ...prev.slice(0, 4)]);
     } catch (err) {
       console.error(err);
       setResult('Ошибка при сканировании багажа');
@@ -52,16 +50,21 @@ export default function BaggageScanner() {
   };
 
   return (
-    <div>
-      <h2>Сканер багажа</h2>
+    <div className="baggage-scanner">
+      <h2>📦 Сканер багажа</h2>
       <button onClick={handleScan}>Сканировать</button>
-      {result && <p><strong>Результат:</strong> {result}</p>}
+
+      {result && (
+        <p className={result.includes('Обнаружен') ? 'alert-text' : 'ok-text'}>
+          <strong>Результат:</strong> {result}
+        </p>
+      )}
 
       <h3>Последние сканирования</h3>
-      <ul>
+      <ul className="scan-log">
         {history.map((item, idx) => (
-          <li key={idx}>
-            [{item.timestamp}] <strong>{item.contents}</strong> → {item.result}
+          <li key={idx} className={item.incident ? 'alert' : 'ok'}>
+            <strong>[{item.timestamp}]</strong> {item.contents} → {item.result}
           </li>
         ))}
       </ul>

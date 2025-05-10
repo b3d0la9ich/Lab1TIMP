@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import './IncidentList.css';
 
 export default function IncidentList() {
   const [incidents, setIncidents] = useState([]);
@@ -36,28 +37,34 @@ export default function IncidentList() {
   }, []);
 
   return (
-    <div>
-      <h2>Журнал инцидентов</h2>
+    <div className="incident-list">
+      <h2>📋 Журнал инцидентов</h2>
       {incidents.length === 0 ? (
         <p>Инцидентов пока нет.</p>
       ) : (
-        <ul>
-          {incidents.map((i) => (
-            <li key={i.id}>
+        incidents.map((i) => (
+          <div
+            key={i.id}
+            className={`incident-card ${i.resolved ? 'resolved' : 'unresolved'}`}
+          >
+            <div className="incident-description">
               <strong>[{i.type}]</strong> {i.description} —{' '}
-              {i.resolved ? '✅ задержан!' : '❗ тревога'}{' '}
+              {i.resolved ? (
+                <span className="status-ok">✅ задержан!</span>
+              ) : (
+                <span className="status-alert">❗ тревога</span>
+              )}
+            </div>
+            <div className="buttons">
               {!i.resolved && (
-                <>
-                  <button onClick={() => resolveIncident(i.id)}>Задержать!</button>{' '}
-                  <button onClick={() => deleteIncident(i.id)}>Удалить</button>
-                </>
+                <button onClick={() => resolveIncident(i.id)}>Задержать!</button>
               )}
-              {i.resolved && (
-                <button onClick={() => deleteIncident(i.id)}>Удалить</button>
-              )}
-            </li>
-          ))}
-        </ul>
+              <button className="delete" onClick={() => deleteIncident(i.id)}>
+                Удалить
+              </button>
+            </div>
+          </div>
+        ))
       )}
     </div>
   );
