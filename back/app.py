@@ -63,9 +63,12 @@ def hash_password(password):
 
 def get_current_user():
     token = request.headers.get('Authorization')
+    print("[DEBUG] Токен из запроса:", token)
+    print("[DEBUG] Все сессии:", SESSIONS)
+
     if token and token in SESSIONS:
         return SESSIONS[token]
-    return None 
+    return None
 
 @app.route('/api/login', methods=['POST'])
 def login():
@@ -125,6 +128,35 @@ def get_incidents():
     return jsonify(sorted_incidents)
 
 @app.route('/api/resolve/<int:incident_id>', methods=['POST'])
+def resolve_incident(incident_id):
+    user = get_current_user()
+    if not user or user['role'] != 'admin':
+        return jsonify({'success': False, 'error': 'Доступ запрещён'}), 403
+    incidents = load_incidents()
+    for i in incidents:
+        if i['id'] == incident_id:
+            i['resolved'] = True
+            save_incidents(incidents)
+            return jsonify({'success': True})
+    return jsonify({'success': False, 'error': 'Инцидент не найден'}), 404
+
+@app.route('/api/incidents/<int:incident_id>', methods=['PATCH'])
+def update_incident(incident_id):
+    user = get_current_user()
+    if not user or user['role'] != 'admin':
+        return jsonify({'success': False, 'error': 'Доступ запрещён'}), 403
+    data = request.json
+    incidents = load_incidents()
+    for incident in incidents:
+        if incident['id'] == incident_id:
+            if 'status' in data:
+                incident['status'] = data['status']
+                save_incidents(incidents)
+                return jsonify({'success': True})
+            return jsonify({'success': False, 'error': 'Нет поля status'}), 400
+    return jsonify({'success': False, 'error': 'Инцидент не найден'}), 404
+
+
 def resolve_incident(incident_id):
     user = get_current_user()
     if not user or user['role'] != 'admin':

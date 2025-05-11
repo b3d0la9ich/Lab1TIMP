@@ -19,7 +19,7 @@ export default function IncidentList() {
   const resolveIncident = async (id) => {
     try {
       await axios.post(
-        `/api/resolve/${id}`,
+        `http://localhost:5000/api/resolve/${id}`,
         {},
         {
           headers: { Authorization: token },
@@ -42,6 +42,21 @@ export default function IncidentList() {
     }
   };
 
+  const updateStatus = async (id, newStatus) => {
+    try {
+      await axios.patch(
+        `http://localhost:5000/api/incidents/${id}`,
+        { status: newStatus },
+        {
+          headers: { Authorization: token },
+        }
+      );
+      loadData();
+    } catch (err) {
+      console.error('Ошибка при обновлении статуса:', err);
+    }
+  };
+
   useEffect(() => {
     loadData();
   }, []);
@@ -58,18 +73,32 @@ export default function IncidentList() {
             className={`incident-card ${i.resolved ? 'resolved' : 'unresolved'}`}
           >
             <div className="incident-description">
-              <strong>[{i.type}]</strong> {i.description} —{' '}
+              <strong>[{i.type}]</strong> {i.description}
+              <br />
+              <strong>Статус:</strong> {i.status || 'новый'} —{' '}
               {i.resolved ? (
                 <span className="status-ok">✅ задержан!</span>
               ) : (
                 <span className="status-alert">❗ тревога</span>
               )}
             </div>
+
             {role === 'admin' && (
               <div className="buttons">
-                {!i.resolved && (
-                  <button onClick={() => resolveIncident(i.id)}>Задержать!</button>
+                {i.status === 'новый' && !i.resolved && (
+                  <>
+                    <button onClick={() => resolveIncident(i.id)}>Задержать!</button>
+                    <button onClick={() => updateStatus(i.id, 'на проверке')}>🕵 На проверке</button>
+                  </>
                 )}
+
+                {i.status === 'на проверке' && (
+                  <>
+                    <button onClick={() => updateStatus(i.id, 'подтверждён')}>✅ Подтверждён</button>
+                    <button onClick={() => updateStatus(i.id, 'ложная тревога')}>⚠ Ложная тревога</button>
+                  </>
+                )}
+
                 <button className="delete" onClick={() => deleteIncident(i.id)}>
                   Удалить
                 </button>
