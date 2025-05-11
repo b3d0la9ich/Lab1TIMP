@@ -1,15 +1,10 @@
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import './Navbar.css';
+import { useContext } from 'react';
+import { AuthContext } from './AuthContext';
 
 export default function Navbar() {
-  const navigate = useNavigate();
-  const isLoggedIn = !!localStorage.getItem('token');
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
-    navigate('/login');
-  };
+  const { role, logout } = useContext(AuthContext);
 
   return (
     <nav className="navbar">
@@ -19,23 +14,19 @@ export default function Navbar() {
       <NavLink to="/person" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
         Сканер человека
       </NavLink>
-      <NavLink to="/incidents" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-        Инциденты
-      </NavLink>
 
-      {!isLoggedIn ? (
-        <>
-          <NavLink to="/login" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-            Вход
-          </NavLink>
-          <NavLink to="/register" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-            Регистрация
-          </NavLink>
-        </>
+      {role === 'admin' && (
+        <NavLink to="/incidents" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+          Инциденты
+        </NavLink>
+      )}
+
+      {!role ? (
+        <NavLink to="/login" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+          Вход
+        </NavLink>
       ) : (
-        <button onClick={handleLogout} className="nav-link logout-button">
-          Выйти
-        </button>
+        <button onClick={logout} className="nav-link">Выйти</button>
       )}
     </nav>
   );

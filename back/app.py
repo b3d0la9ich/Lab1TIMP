@@ -33,24 +33,22 @@ def get_next_id(incidents):
 
 def ensure_admin():
     if not os.path.exists(USERS_FILE):
-        with open(USERS_FILE, 'w') as f:
-            json.dump([], f)
+        users = []
+    else:
+        with open(USERS_FILE, 'r') as f:
+            try:
+                users = json.load(f)
+            except:
+                users = []
 
-    with open(USERS_FILE, 'r') as f:
-        try:
-            users = json.load(f)
-        except json.JSONDecodeError:
-            users = []
-
-    if not any(user['username'] == 'admin' for user in users):
-        admin = {
+    if not any(u['username'] == 'admin' for u in users):
+        users.append({
             "username": "admin",
-            "password": hashlib.sha256("Pa$$w0rd!".encode()).hexdigest(),
+            "password": hash_password("Pa$$w0rd!"),
             "role": "admin"
-        }
-        users.append(admin)
+        })
         with open(USERS_FILE, 'w') as f:
-            json.dump(users, f, indent=2, ensure_ascii=False)
+            json.dump(users, f, indent=2)
 
 def load_users():
     with open(USERS_FILE, 'r') as f:
@@ -68,27 +66,6 @@ def get_current_user():
     if token and token in SESSIONS:
         return SESSIONS[token]
     return None 
-
-@app.route('/api/register', methods=['POST'])
-def register():
-    data = request.json
-    username = data.get('username')
-    password = data.get('password')
-
-    if not username or not password:
-        return jsonify({'success': False, 'error': 'Поля не должны быть пустыми'}), 400
-
-    users = load_users()
-    if any(user['username'] == username for user in users):
-        return jsonify({'success': False, 'error': 'Пользователь уже существует'}), 400
-
-    users.append({
-        'username': username,
-        'password': hash_password(password),
-        'role': 'user'
-    })
-    save_users(users)
-    return jsonify({'success': True})
 
 @app.route('/api/login', methods=['POST'])
 def login():
