@@ -4,15 +4,43 @@ import './IncidentList.css';
 
 export default function IncidentList() {
   const [incidents, setIncidents] = useState([]);
+  const [loading, setLoading] = useState(false); //  Спиннер
+  const [error, setError] = useState(''); //  Сообщения об ошибке
   const role = localStorage.getItem('role');
   const token = localStorage.getItem('token');
 
   const loadData = async () => {
+    setLoading(true);
+    setError('');
     try {
+      await new Promise(resolve => setTimeout(resolve, 2000)); //  тестовая задержка
+  
       const res = await axios.get('http://localhost:5000/api/incidents');
       setIncidents(res.data);
     } catch (err) {
-      console.error('Ошибка загрузки инцидентов:', err);
+      const status = err.response?.status;
+      console.error('Ошибка загрузки данных:', err);
+      setError(`Ошибка загрузки данных (код ${status || 'неизвестен'})`);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+
+  const updateStatus = async (id, newStatus) => {
+    try {
+      await axios.patch(
+        `http://localhost:5000/api/incidents/${id}`,
+        { status: newStatus },
+        {
+          headers: { Authorization: token },
+        }
+      );
+      loadData();
+    } catch (err) {
+      const status = err.response?.status;
+      console.error('Ошибка при обновлении статуса:', err);
+      setError(`Ошибка обновления статуса (код ${status || 'неизвестен'})`);
     }
   };
 
@@ -27,7 +55,9 @@ export default function IncidentList() {
       );
       loadData();
     } catch (err) {
-      console.error('Ошибка при завершении инцидента:', err);
+      const status = err.response?.status;
+      console.error('Ошибка при задержании инцидента:', err);
+      setError(`Ошибка при задержании (код ${status || 'неизвестен'})`);
     }
   };
 
@@ -38,22 +68,9 @@ export default function IncidentList() {
       });
       loadData();
     } catch (err) {
+      const status = err.response?.status;
       console.error('Ошибка при удалении инцидента:', err);
-    }
-  };
-
-  const updateStatus = async (id, newStatus) => {
-    try {
-      await axios.patch(
-        `http://localhost:5000/api/incidents/${id}`,
-        { status: newStatus },
-        {
-          headers: { Authorization: token },
-        }
-      );
-      loadData();
-    } catch (err) {
-      console.error('Ошибка при обновлении статуса:', err);
+      setError(`Ошибка при удалении (код ${status || 'неизвестен'})`);
     }
   };
 
@@ -64,19 +81,34 @@ export default function IncidentList() {
   return (
     <div className="incident-list">
       <h2>📋 Журнал инцидентов</h2>
-      {incidents.length === 0 ? (
+
+      {/* Сообщение об ошибке */}
+      {error && <div className="error-message">⚠ {error}</div>}
+
+      {/* Спиннер загрузки */}
+      {loading ? (
+        <p>🔄 Загрузка инцидентов...</p>
+      ) : incidents.length === 0 ? (
         <p>Инцидентов пока нет.</p>
       ) : (
         incidents.map((i) => (
           <div
             key={i.id}
-            className={`incident-card ${i.resolved ? 'resolved' : 'unresolved'}`}
+            className={`incident-card ${
+              i.status === 'отпущен'
+                ? 'released'
+                : i.resolved
+                ? 'resolved'
+                : 'unresolved'
+            }`}
           >
             <div className="incident-description">
               <strong>[{i.type}]</strong> {i.description}
               <br />
               <strong>Статус:</strong> {i.status || 'новый'} —{' '}
-              {i.resolved ? (
+              {i.status === 'отпущен' ? (
+                <span className="status-released">🚪 Отпущен</span>
+              ) : i.resolved ? (
                 <span className="status-ok">✅ задержан!</span>
               ) : (
                 <span className="status-alert">❗ тревога</span>
@@ -85,10 +117,12 @@ export default function IncidentList() {
 
             {role === 'admin' && (
               <div className="buttons">
-                {i.status === 'новый' && !i.resolved && (
+                {(!i.status || i.status === 'новый') && (
                   <>
-                    <button onClick={() => resolveIncident(i.id)}>Задержать!</button>
                     <button onClick={() => updateStatus(i.id, 'на проверке')}>🕵 На проверке</button>
+                    <button className="delete" onClick={() => deleteIncident(i.id)}>
+                      Удалить
+                    </button>
                   </>
                 )}
 
@@ -99,9 +133,23 @@ export default function IncidentList() {
                   </>
                 )}
 
-                <button className="delete" onClick={() => deleteIncident(i.id)}>
-                  Удалить
-                </button>
+                {i.status === 'подтверждён' && !i.resolved && (
+                  <>
+                    <button onClick={() => resolveIncident(i.id)}>Задержать!</button>
+                    <button className="delete" onClick={() => deleteIncident(i.id)}>
+                      Удалить
+                    </button>
+                  </>
+                )}
+
+                {i.status === 'ложная тревога' && (
+                  <>
+                    <button onClick={() => updateStatus(i.id, 'отпущен')}>🚪 Отпустить</button>
+                    <button className="delete" onClick={() => deleteIncident(i.id)}>
+                      Удалить
+                    </button>
+                  </>
+                )}
               </div>
             )}
           </div>

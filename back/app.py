@@ -97,7 +97,8 @@ def scan_baggage():
             'type': 'Багаж',
             'description': 'Обнаружен запрещённый предмет',
             'timestamp': datetime.utcnow().isoformat(),
-            'resolved': False
+            'resolved': False,
+            'status': 'новый'  # 👈 добавлено
         }
         incidents.append(new_incident)
         save_incidents(incidents)
@@ -114,7 +115,8 @@ def scan_person():
             'type': 'Человек',
             'description': 'Сканер сработал на подозрение',
             'timestamp': datetime.utcnow().isoformat(),
-            'resolved': False
+            'resolved': False,
+            'status': 'новый'  # 👈 добавлено
         }
         incidents.append(new_incident)
         save_incidents(incidents)
@@ -138,7 +140,7 @@ def resolve_incident(incident_id):
             i['resolved'] = True
             save_incidents(incidents)
             return jsonify({'success': True})
-    return jsonify({'success': False, 'error': 'Инцидент не найден'}), 404
+    return jsonify({'success': False, 'error': 'Инцидент не найден'}), 404  
 
 @app.route('/api/incidents/<int:incident_id>', methods=['PATCH'])
 def update_incident(incident_id):

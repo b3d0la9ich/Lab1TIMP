@@ -83,3 +83,13 @@ button.delete {
 button.delete:hover {
   background-color: #a71d2a;
 }
+
+.incident-card.released {
+  border-left: 6px solid orange;
+}
+
+.status-released {
+  color: orange;
+  font-weight: bold;
+}
+

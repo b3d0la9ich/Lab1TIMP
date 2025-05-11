@@ -55,4 +55,13 @@
     font-size: 14px;
     text-align: center;
   }
+
+  .error-message {
+    background-color: #ffe5e5;
+    color: #c00;
+    border: 1px solid #c00;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+  }
   
