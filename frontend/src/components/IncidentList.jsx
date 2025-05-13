@@ -13,7 +13,7 @@ export default function IncidentList() {
     setLoading(true);
     setError('');
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000)); //  тестовая задержка
+      await new Promise(resolve => setTimeout(resolve, 500)); //  тестовая задержка
   
       const res = await axios.get('http://localhost:5000/api/incidents');
       setIncidents(res.data);
@@ -87,7 +87,9 @@ export default function IncidentList() {
 
       {/* Спиннер загрузки */}
       {loading ? (
-        <p>🔄 Загрузка инцидентов...</p>
+        <div className="spinner">
+          <div className="spinner-circle"></div>
+        </div>
       ) : incidents.length === 0 ? (
         <p>Инцидентов пока нет.</p>
       ) : (
@@ -117,15 +119,12 @@ export default function IncidentList() {
 
             {role === 'admin' && (
               <div className="buttons">
+                {/* Этап 1: статус новый — кнопка "на проверке" */}
                 {(!i.status || i.status === 'новый') && (
-                  <>
-                    <button onClick={() => updateStatus(i.id, 'на проверке')}>🕵 На проверке</button>
-                    <button className="delete" onClick={() => deleteIncident(i.id)}>
-                      Удалить
-                    </button>
-                  </>
+                  <button onClick={() => updateStatus(i.id, 'на проверке')}>🕵 На проверке</button>
                 )}
 
+                {/* Этап 2: на проверке — подтверждён / ложная тревога */}
                 {i.status === 'на проверке' && (
                   <>
                     <button onClick={() => updateStatus(i.id, 'подтверждён')}>✅ Подтверждён</button>
@@ -133,23 +132,20 @@ export default function IncidentList() {
                   </>
                 )}
 
+                {/* Этап 3: подтверждён — задержать */}
                 {i.status === 'подтверждён' && !i.resolved && (
-                  <>
-                    <button onClick={() => resolveIncident(i.id)}>Задержать!</button>
-                    <button className="delete" onClick={() => deleteIncident(i.id)}>
-                      Удалить
-                    </button>
-                  </>
+                  <button onClick={() => resolveIncident(i.id)}>Задержать!</button>
                 )}
 
+                {/* Этап 4: ложная тревога — отпустить */}
                 {i.status === 'ложная тревога' && (
-                  <>
-                    <button onClick={() => updateStatus(i.id, 'отпущен')}>🚪 Отпустить</button>
-                    <button className="delete" onClick={() => deleteIncident(i.id)}>
-                      Удалить
-                    </button>
-                  </>
+                  <button onClick={() => updateStatus(i.id, 'отпущен')}>🚪 Отпустить</button>
                 )}
+
+                {/* Кнопка Удалить — ВСЕГДА */}
+                <button className="delete" onClick={() => deleteIncident(i.id)}>
+                  Удалить
+                </button>
               </div>
             )}
           </div>
