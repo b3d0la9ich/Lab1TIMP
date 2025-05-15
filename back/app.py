@@ -11,7 +11,7 @@ CORS(app)
 
 INCIDENTS_FILE = 'incidents.json'
 USERS_FILE = 'users.json'
-SESSIONS = {}  # token -> user dict
+SESSIONS = {}  
 
 @app.route('/')
 def index():

@@ -70,5 +70,37 @@
     "timestamp": "2025-05-13T08:10:57.040869",
     "resolved": false,
     "status": "новый"
+  },
+  {
+    "id": 11,
+    "type": "Багаж",
+    "description": "Обнаружен запрещённый предмет",
+    "timestamp": "2025-05-13T17:36:37.666576",
+    "resolved": false,
+    "status": "новый"
+  },
+  {
+    "id": 12,
+    "type": "Багаж",
+    "description": "Обнаружен запрещённый предмет",
+    "timestamp": "2025-05-13T17:37:27.409772",
+    "resolved": false,
+    "status": "новый"
+  },
+  {
+    "id": 13,
+    "type": "Человек",
+    "description": "Сканер сработал на подозрение",
+    "timestamp": "2025-05-13T17:37:43.671015",
+    "resolved": true,
+    "status": "подтверждён"
+  },
+  {
+    "id": 14,
+    "type": "Багаж",
+    "description": "Обнаружен запрещённый предмет",
+    "timestamp": "2025-05-13T18:57:40.944100",
+    "resolved": false,
+    "status": "новый"
   }
 ]

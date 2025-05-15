@@ -1,13 +1,22 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './IncidentList.css';
 
 export default function IncidentList() {
   const [incidents, setIncidents] = useState([]);
-  const [loading, setLoading] = useState(false); //  Спиннер
-  const [error, setError] = useState(''); //  Сообщения об ошибке
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const role = localStorage.getItem('role');
   const token = localStorage.getItem('token');
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!token || role !== 'admin') {
+      navigate('/login');
+    }
+    loadData();
+  }, []);
 
   const loadData = async () => {
     setLoading(true);
@@ -15,6 +24,7 @@ export default function IncidentList() {
     try {
       await new Promise(resolve => setTimeout(resolve, 500)); //  тестовая задержка
   
+
       const res = await axios.get('http://localhost:5000/api/incidents');
       setIncidents(res.data);
     } catch (err) {
@@ -25,7 +35,6 @@ export default function IncidentList() {
       setLoading(false);
     }
   };
-  
 
   const updateStatus = async (id, newStatus) => {
     try {
@@ -74,18 +83,12 @@ export default function IncidentList() {
     }
   };
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
   return (
     <div className="incident-list">
       <h2>📋 Журнал инцидентов</h2>
 
-      {/* Сообщение об ошибке */}
       {error && <div className="error-message">⚠ {error}</div>}
 
-      {/* Спиннер загрузки */}
       {loading ? (
         <div className="spinner">
           <div className="spinner-circle"></div>
@@ -117,37 +120,30 @@ export default function IncidentList() {
               )}
             </div>
 
-            {role === 'admin' && (
-              <div className="buttons">
-                {/* Этап 1: статус новый — кнопка "на проверке" */}
-                {(!i.status || i.status === 'новый') && (
-                  <button onClick={() => updateStatus(i.id, 'на проверке')}>🕵 На проверке</button>
-                )}
+            <div className="buttons">
+              {!i.status || i.status === 'новый' ? (
+                <button onClick={() => updateStatus(i.id, 'на проверке')}>🕵 На проверке</button>
+              ) : null}
 
-                {/* Этап 2: на проверке — подтверждён / ложная тревога */}
-                {i.status === 'на проверке' && (
-                  <>
-                    <button onClick={() => updateStatus(i.id, 'подтверждён')}>✅ Подтверждён</button>
-                    <button onClick={() => updateStatus(i.id, 'ложная тревога')}>⚠ Ложная тревога</button>
-                  </>
-                )}
+              {i.status === 'на проверке' && (
+                <>
+                  <button onClick={() => updateStatus(i.id, 'подтверждён')}>✅ Подтверждён</button>
+                  <button onClick={() => updateStatus(i.id, 'ложная тревога')}>⚠ Ложная тревога</button>
+                </>
+              )}
 
-                {/* Этап 3: подтверждён — задержать */}
-                {i.status === 'подтверждён' && !i.resolved && (
-                  <button onClick={() => resolveIncident(i.id)}>Задержать!</button>
-                )}
+              {i.status === 'подтверждён' && !i.resolved && (
+                <button onClick={() => resolveIncident(i.id)}>Задержать!</button>
+              )}
 
-                {/* Этап 4: ложная тревога — отпустить */}
-                {i.status === 'ложная тревога' && (
-                  <button onClick={() => updateStatus(i.id, 'отпущен')}>🚪 Отпустить</button>
-                )}
+              {i.status === 'ложная тревога' && (
+                <button onClick={() => updateStatus(i.id, 'отпущен')}>🚪 Отпустить</button>
+              )}
 
-                {/* Кнопка Удалить — ВСЕГДА */}
-                <button className="delete" onClick={() => deleteIncident(i.id)}>
-                  Удалить
-                </button>
-              </div>
-            )}
+              <button className="delete" onClick={() => deleteIncident(i.id)}>
+                Удалить
+              </button>
+            </div>
           </div>
         ))
       )}

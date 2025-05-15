@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import React, { useContext } from 'react';
+import HomePage from './pages/HomePage';
 import Navbar from './components/Navbar';
 import BaggageScanner from './pages/BaggageScanner';
 import PersonScanner from './pages/PersonScanner';
@@ -15,6 +16,7 @@ function App() {
     <div style={{ padding: '1rem', fontFamily: 'Arial, sans-serif' }}>
       <Navbar />
       <Routes>
+        <Route path="/" element={<HomePage />} />
         <Route path="/baggage" element={<BaggageScanner />} />
         <Route path="/person" element={<PersonScanner />} />
         <Route path="/incidents" element={
