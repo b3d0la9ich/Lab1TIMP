@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import axios from 'axios';
-import { AuthContext } from '../components/AuthContext';
+import { AuthContext } from './AuthContext';
 import { useNavigate } from 'react-router-dom';
 import './LoginForm.css';
 
@@ -13,17 +13,24 @@ export default function LoginForm() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError('');
+
+    const trimmedUsername = username.trim();
+    const trimmedPassword = password.trim();
+
+    if (!trimmedUsername || !trimmedPassword) {
+      setError('Имя и пароль не могут быть пустыми или состоять только из пробелов.');
+      return;
+    }
 
     try {
       const res = await axios.post('http://localhost:5000/api/login', {
-        username,
-        password
+        username: trimmedUsername,
+        password: trimmedPassword
       });
 
       if (res.data.success) {
         login(res.data.token, res.data.role);
-        navigate('/baggage');
+        navigate('/');
       } else {
         setError(res.data.error || 'Ошибка входа');
       }
